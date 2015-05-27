@@ -18,7 +18,10 @@
 #include <sstream> 
 
 #include "TGraph.h"
-
+#include "TMultiGraph.h"
+#include "TCanvas.h"
+#include "TDatime.h"
+#include "TAxis.h"
 
 
 int main(int argc, char** argv) {
@@ -85,7 +88,7 @@ int main(int argc, char** argv) {
        if (iremove != std::string::npos) {
         tempString_value_total.erase(iremove, 3);
        }
-       std::cout << tempString_value_total << std::endl;
+//        std::cout << tempString_value_total << std::endl;
        float cpu_free = stof(tempString_value_total);
        
        line >> tempString_value_total; 
@@ -106,7 +109,7 @@ int main(int argc, char** argv) {
        
        
        bool isPresent = (std::find(machines_names.begin(), machines_names.end(), tempString_value_machineName) != machines_names.end());
-       if (isPresent) {
+       if (!isPresent) {
         machines_names.push_back(tempString_value_machineName);
        }
       }
@@ -121,28 +124,59 @@ int main(int argc, char** argv) {
   
   
   //---- plot ----
+  typedef std::map<std::pair <std::time_t, std::string> , float >::iterator it_type;
   for (int iMachine = 0; iMachine < machines_names.size(); iMachine++) {
    std::string plot_name = machines_names.at(iMachine) + ".png";
    
-   TGraph*  gr = new TGraph();
-//    gr->SetLineColor(2);
-//    gr->SetLineWidth(4);
-//    gr->SetMarkerColor(4);
-//    gr->SetMarkerStyle(21);
-//    gr->SetTitle("a simple graph");
-//    
-//    
-//    
-//    gr->GetXaxis()->SetTitle("X title");
+   TGraph*  gr_memory = new TGraph();
+   gr_memory->SetLineColor(2);
+   gr_memory->SetLineWidth(1);
+   gr_memory->SetMarkerColor(2);
+   gr_memory->SetMarkerStyle(21);
+
+   int nPoint = 0;
+   for(it_type iterator = machine_res_memory.begin(); iterator != machine_res_memory.end(); iterator++) {
+    if (iterator->first.second == machines_names.at(iMachine)) {
+     std::time_t timer = iterator->first.first;
+     gr_memory->SetPoint(nPoint, timer, iterator->second);
+     nPoint++;
+    }
+   }
+   
+   TGraph*  gr_cpu = new TGraph();
+   gr_cpu->SetLineColor(3);
+   gr_cpu->SetLineWidth(1);
+   gr_cpu->SetMarkerColor(3);
+   gr_cpu->SetMarkerStyle(22);
+   
+   nPoint = 0;
+   for(it_type iterator = machine_res_cpu.begin(); iterator != machine_res_cpu.end(); iterator++) {
+    if (iterator->first.second == machines_names.at(iMachine)) {
+     std::time_t timer = iterator->first.first;
+     gr_cpu->SetPoint(nPoint, timer, iterator->second / 100.);
+     nPoint++;
+    }
+   }
+   
+   TCanvas* cc = new TCanvas(machines_names.at(iMachine).c_str(),"cc",800,500);
+
+   TMultiGraph *mg = new TMultiGraph();
+   mg->Add(gr_cpu,   "lp");
+   mg->Add(gr_memory,"lp");
+   mg->Draw("a");
+   mg->GetXaxis()->SetTimeDisplay(1);
+   mg->GetXaxis()->SetNdivisions(-503);
+   mg->GetXaxis()->SetTimeFormat("%Y-%m-%d %H:%M");
+   mg->GetXaxis()->SetTimeOffset(0,"gmt");
+   mg->GetYaxis()->SetRangeUser(0.0, 1.0);
+   cc->SetGrid();
+   cc->Modified();
+   
+   cc->SaveAs(plot_name.c_str());
+   //    gr->GetXaxis()->SetTitle("X title");
 //    gr->GetYaxis()->SetTitle("Y title");
-//    gr->Draw("ACP");
 //    
 //    // TCanvas::Update() draws the frame, after which one can change it
-//    c1->Update();
-//    c1->GetFrame()->SetFillColor(21);
-//    c1->GetFrame()->SetBorderSize(12);
-//    c1->Modified()
-   
    
   }
   
