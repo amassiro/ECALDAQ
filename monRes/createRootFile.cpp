@@ -22,7 +22,8 @@
 #include "TCanvas.h"
 #include "TDatime.h"
 #include "TAxis.h"
-
+#include "TStyle.h"
+#include "TLegend.h"
 
 int main(int argc, char** argv) {
  
@@ -158,8 +159,20 @@ int main(int argc, char** argv) {
     }
    }
    
-   TCanvas* cc = new TCanvas(machines_names.at(iMachine).c_str(),"cc",800,500);
-
+   TCanvas* cc = new TCanvas(machines_names.at(iMachine).c_str(),"cc",900,500);
+   
+   gStyle->SetPadColor       (   0);
+   gStyle->SetPadBottomMargin(0.08);
+   gStyle->SetPadTopMargin   (0.08);
+   gStyle->SetPadLeftMargin  (0.08);
+   gStyle->SetPadRightMargin (0.20);
+   
+   TLegend* leg = new TLegend(0.81,0.20,0.99,0.80);
+   leg->SetHeader(machines_names.at(iMachine).c_str());
+   leg->AddEntry(gr_cpu,"free CPU","PL");
+   leg->AddEntry(gr_memory,"free MEMORY","PL");
+   
+   
    TMultiGraph *mg = new TMultiGraph();
    mg->Add(gr_cpu,   "lp");
    mg->Add(gr_memory,"lp");
@@ -169,6 +182,8 @@ int main(int argc, char** argv) {
    mg->GetXaxis()->SetTimeFormat("%Y-%m-%d %H:%M");
    mg->GetXaxis()->SetTimeOffset(0,"gmt");
    mg->GetYaxis()->SetRangeUser(0.0, 1.0);
+
+   leg->Draw();
    cc->SetGrid();
    cc->Modified();
    
