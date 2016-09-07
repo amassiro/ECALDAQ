@@ -24,15 +24,15 @@ public:
    ClassDef(MyMainFrame, 0)
 };
 
-void MyMainFrame::DoSelect()
-{
-   Printf("Slot DoSelect()");
+
+void MyMainFrame::DoSelect() {
+  std::cout << "Slot DoSelect()" << std::endl;
 }
 
 void MyMainFrame::DoExit()
 {
-   Printf("Slot DoExit()");
-   gApplication->Terminate(0);
+  std::cout << "Slot DoExit()" << std::endl;
+  gApplication->Terminate(0);
 }
 
 MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h) :
@@ -121,4 +121,5 @@ void guiControl()
 {
    // Popup the GUI...
    new MyMainFrame(gClient->GetRoot(), 200, 200);
+   
 }
